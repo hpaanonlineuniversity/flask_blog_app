@@ -1,0 +1,17 @@
+{% extends "base.html" %}   
+{% block title %}Person Details{% endblock %}
+
+{% block content %}
+    {% if person %}
+        <h1>Person Details</h1>
+        <p><strong>Name:</strong> {{ person.name }}</p>
+        <p><strong>Age:</strong> {{ person.age }}</p>
+        <p><strong>Job:</strong> {{ person.job }}</p>
+        <p><strong>ID:</strong> {{ person._id }}</p>
+        
+        <a href="{{ url_for('index') }}">← Back to List</a>
+    {% else %}
+        <p>Person not found!</p>
+        <a href="{{ url_for('index') }}">← Back to List</a>
+    {% endif %}
+{% endblock %}
