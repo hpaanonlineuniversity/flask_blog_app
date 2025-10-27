@@ -1,8 +1,10 @@
 from flask import Flask
 from pymongo import MongoClient
 from .models.user_model import UserModel
+from .models.post_model import PostModel
 from .routes.auth_routes import create_auth_blueprint
-from .routes.user_routes import create_user_blueprint  # ADD THIS
+from .routes.user_routes import create_user_blueprint
+from .routes.post_routes import create_post_blueprint 
 import os
 
 def create_app():
@@ -18,17 +20,23 @@ def create_app():
     
     # Initialize User Model
     user_model = UserModel(db)
+    post_model = PostModel(db)
+
     user_model.create_indexes()
+    post_model.create_indexes()
     
     # Store user_model in app context for easy access
     app.user_model = user_model
-    
+    app.post_model = post_model
+
     # Register Blueprints
     auth_bp = create_auth_blueprint(user_model)
-    user_bp = create_user_blueprint(user_model)  # ADD THIS
+    user_bp = create_user_blueprint(user_model)
+    post_bp = create_post_blueprint()
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(user_bp, url_prefix='/api/user')  # ADD THIS
+    app.register_blueprint(user_bp, url_prefix='/api/user') 
+    app.register_blueprint(post_bp, url_prefix='/api/post')
     
     # CORS setup
     from flask_cors import CORS
