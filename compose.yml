@@ -19,5 +19,21 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+        - node_modules_frontend:/app/node_modules
+        - ./frontend:/app
+    env_file:
+      - .env
+    environment:
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_KEY=${VITE_SUPABASE_KEY}
+
 volumes:
   mongo-data:
+  node_modules_frontend:
