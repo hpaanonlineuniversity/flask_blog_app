@@ -48,5 +48,9 @@ def create_app():
     # CORS setup
     from flask_cors import CORS
     CORS(app, supports_credentials=True)
+
+    # Default admin user ကို ဖန်တီးပါ
+    with app.app_context():
+        user_model.create_default_admin()
     
     return app

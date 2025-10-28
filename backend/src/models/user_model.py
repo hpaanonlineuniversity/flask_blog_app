@@ -121,3 +121,32 @@ class UserModel:
         
         result = self.collection.delete_one({'_id': object_id})
         return result.deleted_count > 0
+    
+
+    def create_default_admin(self):
+        """Environment variables ကနေ admin details ယူပြီး ဖန်တီးခြင်း"""
+        admin_email = os.getenv('ADMIN_EMAIL', 'admin@example.com')
+        admin_username = os.getenv('ADMIN_USERNAME', 'admin')
+        admin_password = os.getenv('ADMIN_PASSWORD', 'admin123')
+        
+        existing_admin = self.find_by_email(admin_email)
+        if existing_admin:
+            print("Admin user already exists")
+            return existing_admin
+        
+        hashed_password = bcrypt.generate_password_hash(admin_password).decode('utf-8')
+        
+        admin_user = User(
+            username=admin_username,
+            email=admin_email,
+            password=hashed_password,
+            is_admin=True
+        )
+        
+        try:
+            created_admin = self.create_user(admin_user)
+            print("Default admin user created successfully!")
+            return created_admin
+        except Exception as e:
+            print(f"Error creating admin user: {str(e)}")
+            return None

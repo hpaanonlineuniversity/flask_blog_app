@@ -11,6 +11,9 @@ services:
       - .env
     environment:
       - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
   mongodb:
     image: mongo:noble
     environment:
