@@ -9,7 +9,7 @@ export default function CallToAction() {
         <p className='text-gray-300 mb-6'>Learn from PortSwigger's Web Security Academy</p>
         <div className='flex flex-wrap gap-3 justify-center'>
           <a href="https://portswigger.net/web-security" target="_blank" rel="noopener noreferrer">
-            <Button gradientDuoTone="cyanToBlue">
+            <Button color="purple">
               🔒 PortSwigger Academy
             </Button>
           </a>
