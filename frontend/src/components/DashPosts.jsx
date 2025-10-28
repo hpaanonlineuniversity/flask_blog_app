@@ -23,42 +23,67 @@ export default function DashPosts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
 
+  // Get user ID from both possible fields
+  const userId = currentUser?._id || currentUser?.id;
+  
+  console.log('🔍 Debug - currentUser:', currentUser);
+  console.log('🆔 Debug - User ID:', userId);
+
   useEffect(() => {
-    if (currentUser?._id) {
+    console.log('🎯 useEffect running...');
+    
+    if (userId) {
+      console.log('✅ User ID found, fetching posts...');
       fetchUserPosts();
+    } else {
+      console.log('❌ No user ID available');
+      setLoading(false);
     }
-  }, [currentUser?._id]);
+  }, [userId]);
 
   const fetchUserPosts = async (startIndex = 0) => {
     try {
       setError('');
       setLoading(true);
+      console.log('🔄 Fetching posts...');
+
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
+
       const searchParams = new URLSearchParams({
-        userId: currentUser._id,
+        userId: userId,
         startIndex: startIndex.toString(),
         limit: '8',
         ...(searchTerm && { searchTerm }),
         ...(filterCategory && { category: filterCategory }),
       });
 
+      console.log('🌐 API URL:', `/api/post/getposts?${searchParams}`);
+      
       const res = await fetch(`/api/post/getposts?${searchParams}`);
+      console.log('📡 Response status:', res.status);
+      
       const data = await res.json();
+      console.log('📦 Received data:', data);
 
       if (!res.ok) {
         throw new Error(data.message || 'Failed to fetch posts');
       }
 
       if (startIndex === 0) {
-        setUserPosts(data.posts);
+        setUserPosts(data.posts || []);
       } else {
-        setUserPosts(prev => [...prev, ...data.posts]);
+        setUserPosts(prev => [...prev, ...(data.posts || [])]);
       }
 
-      setShowMore(data.posts.length === 8);
+      setShowMore((data.posts || []).length === 8);
     } catch (error) {
+      console.error('❌ Error fetching posts:', error);
       setError(error.message);
-      console.error('Error fetching posts:', error);
+      setUserPosts([]);
     } finally {
+      console.log('✅ Finished loading');
       setLoading(false);
     }
   };
@@ -71,7 +96,12 @@ export default function DashPosts() {
   const handleDeletePost = async () => {
     try {
       setError('');
-      const res = await fetch(`/api/post/deletepost/${postIdToDelete}/${currentUser._id}`, {
+      
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
+
+      const res = await fetch(`/api/post/deletepost/${postIdToDelete}/${userId}`, {
         method: 'DELETE',
       });
 
@@ -103,6 +133,17 @@ export default function DashPosts() {
   // Get unique categories for filter
   const categories = [...new Set(userPosts.map(post => post.category).filter(Boolean))];
 
+  // If no user data at all
+  if (!currentUser) {
+    return (
+      <div className="flex justify-center items-center min-h-64 flex-col gap-4">
+        <Spinner size="xl" />
+        <span className="text-lg">Loading user information...</span>
+      </div>
+    );
+  }
+
+  // Loading state
   if (loading && userPosts.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-64">
@@ -191,7 +232,7 @@ export default function DashPosts() {
               </thead>
               <tbody>
                 {userPosts.map((post) => (
-                  <tr key={post._id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                  <tr key={post._id || post.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-900 dark:text-white">
@@ -253,7 +294,7 @@ export default function DashPosts() {
                           <HiOutlineEye className="w-5 h-5" />
                         </Link>
                         <Link
-                          to={`/update-post/${post._id}`}
+                          to={`/update-post/${post._id || post.id}`}
                           className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                           title="Edit Post"
                         >
@@ -262,7 +303,7 @@ export default function DashPosts() {
                         <button
                           onClick={() => {
                             setShowModal(true);
-                            setPostIdToDelete(post._id);
+                            setPostIdToDelete(post._id || post.id);
                           }}
                           className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                           title="Delete Post"
@@ -277,26 +318,27 @@ export default function DashPosts() {
             </table>
           </div>
         </div>
-      ) :(
-      <div className="text-center py-12">
-        <HiOutlineNewspaper className="w-24 h-24 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          {searchTerm || filterCategory ? 'No matching posts found' : 'No posts yet'}
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-          {searchTerm || filterCategory 
-            ? 'Try adjusting your search terms or filters to find what you\'re looking for.'
-            : 'Start sharing your thoughts with the world! Create your first blog post to get started.'}
-        </p>
-        <Link
-          to="/create-post"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all"
-        >
-          <HiOutlinePlus className="w-5 h-5" />
-          Create Your First Post
-        </Link>
-      </div>
-    )} 
+      ) : (
+        <div className="text-center py-12">
+          <HiOutlineNewspaper className="w-24 h-24 mx-auto text-gray-300 mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {searchTerm || filterCategory ? 'No matching posts found' : 'No posts yet'}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            {searchTerm || filterCategory 
+              ? 'Try adjusting your search terms or filters to find what you\'re looking for.'
+              : 'Start sharing your thoughts with the world! Create your first blog post to get started.'}
+          </p>
+          <Link
+            to="/create-post"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all"
+          >
+            <HiOutlinePlus className="w-5 h-5" />
+            Create Your First Post
+          </Link>
+        </div>
+      )} 
+      
       {/* Show More Button */}
       {showMore && userPosts.length > 0 && (
         <div className="flex justify-center mt-8">
@@ -311,21 +353,16 @@ export default function DashPosts() {
         </div>
       )}
 
-      <div className="p-6 mx-auto">
-        
       {/* Modal component */}
-
       <DeleteConfirmationModal
         show={showModal}
         onClose={() => setShowModal(false)}
         onConfirm={handleDeletePost}
         title="Delete Post Confirmation"
         message="Are you sure you want to delete this post? This action cannot be undone and the post will be permanently removed."
-        confirmText = "Yes, Delete It"
-        cancelText = "Cancel"
+        confirmText="Yes, Delete It"
+        cancelText="Cancel"
       />
-       </div>
-
     </div>
   );
 }

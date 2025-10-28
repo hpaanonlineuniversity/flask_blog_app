@@ -50,7 +50,7 @@ export default function SignIn() {
         // User data ကို clear ဖြစ်အောင် format လုပ်ပါ
         const userData = {
           //_id: data._id,
-          _id: data.user._id,
+          _id: data.user.id,   // becareful _id or id
           username: data.user.username,
           email: data.user.email,
           profilePicture: data.user.profilePicture,
