@@ -23,6 +23,7 @@ export default function CreatePost() {
   const fileRef = useRef(null);
   const dispatch = useDispatch();
   const [publishError, setPublishError] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Initialize formData state
   const [formData, setFormData] = useState({
@@ -58,49 +59,79 @@ export default function CreatePost() {
     }
   }, []);
 
-  const handleFileUpload = async (image) => {
-    try {
-      if (!image) {
-        throw new Error('No file selected');
-      }
+ 
 
-      const maxSize = 5 * 1024 * 1024; // 5MB for posts
-      if (image.size > maxSize) {
-        throw new Error('File size must be less than 5MB');
-      }
+const handleFileUpload = async (image) => {
+  try {
+    if (!image) {
+      throw new Error('No file selected');
+    }
 
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(image.type)) {
-        throw new Error('Please select a valid image file (JPEG, PNG, GIF, WebP)');
-      }
+    const maxSize = 5 * 1024 * 1024;
+    if (image.size > maxSize) {
+      throw new Error('File size must be less than 5MB');
+    }
 
-      const reader = new FileReader();
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(image.type)) {
+      throw new Error('Please select a valid image file (JPEG, PNG, GIF, WebP)');
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    // Simulate upload progress
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + 10;
+      });
+    }, 100);
+
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      clearInterval(progressInterval);
+      setUploadProgress(100);
       
-      reader.onload = (event) => {
+      setTimeout(() => {
         try {
           const base64String = event.target.result;
           localStorage.setItem('postImage', base64String);
           setLocalPostImage(base64String);
           setImagePreview(base64String);
           setFormData(prev => ({ ...prev, image: base64String }));
-          console.log('Post image saved to local storage successfully');
+          setIsUploading(false);
+          setUploadProgress(0);
+          console.log('Post image saved successfully');
         } catch (error) {
           console.error('Error processing file:', error.message);
           alert('Error saving post image: ' + error.message);
+          setIsUploading(false);
+          setUploadProgress(0);
         }
-      };
+      }, 500);
+    };
 
-      reader.onerror = (error) => {
-        console.error('File reading error:', error);
-        alert('Error reading file');
-      };
+    reader.onerror = (error) => {
+      clearInterval(progressInterval);
+      console.error('File reading error:', error);
+      alert('Error reading file');
+      setIsUploading(false);
+      setUploadProgress(0);
+    };
 
-      reader.readAsDataURL(image);
-    } catch (error) {
-      console.error('Error uploading file:', error.message);
-      alert(error.message);
-    }
-  };
+    reader.readAsDataURL(image);
+  } catch (error) {
+    console.error('Error uploading file:', error.message);
+    alert(error.message);
+    setIsUploading(false);
+    setUploadProgress(0);
+  }
+};
 
   const clearPostImage = () => {
     localStorage.removeItem('postImage');
@@ -111,48 +142,74 @@ export default function CreatePost() {
   };
 
   const handleImageUpload = () => {
-    // Image upload logic will be handled by parent component
-    setIsUploading(true);
-    setTimeout(() => setIsUploading(false), 1000); // Simulate upload
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); 
+    // ဒါမှမဟုတ် handleImageUpload function ကိုဖျက်ပစ်ပါ
+    // ဘာလို့လဲဆိုတော့ useEffect ကနေ အလုပ်လုပ်နေလို့
 
-    console.log('Form Data:', formData);
-    
-    try {
-      const res = await fetch('/api/post/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
+  if (image) {
+    handleFileUpload(image);
+  } else {
+    alert('Please select an image first');
+  }
+};
 
-      const data = await res.json();
-      console.log('Update response:', data);
 
-      if (!res.ok) {
-        setPublishError(data.message);
-        return;
-      }
 
-      if (res.ok) {
-        setPublishError(null);
-        // localStorage ကပုံကိုဖျက်ရန်
-        localStorage.removeItem('postImage');
-        navigate(`/post/${data.slug}`);
-      }
-    } catch (error) {
-      setPublishError('Something went wrong');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Form validation
+  if (!formData.title.trim()) {
+    setPublishError('Please enter a title');
+    return;
+  }
+  
+  if (!formData.content.trim()) {
+    setPublishError('Please enter post content');
+    return;
+  }
+  
+  if (formData.content.trim().length < 50) {
+    setPublishError('Post content should be at least 50 characters');
+    return;
+  }
+
+  setLoading(true); 
+  setPublishError(null);
+
+  console.log('Form Data:', formData);
+  
+  try {
+    const res = await fetch('/api/post/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    console.log('Create post response:', data);
+
+    if (!res.ok) {
+      setPublishError(data.message || 'Failed to create post');
+      return;
     }
-    finally {
-      setLoading(false); // loading ပြီးမယ်
+
+    if (res.ok) {
+      setPublishError(null);
+      // Clear localStorage image
+      localStorage.removeItem('postImage');
+      navigate(`/post/${data.slug}`);
     }
-  };
+  } catch (error) {
+    console.error('Create post error:', error);
+    setPublishError('Something went wrong. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
@@ -363,6 +420,32 @@ export default function CreatePost() {
             </div>
           </form>
         </Card>
+
+        {/* Error Alert */}
+{publishError && (
+  <Alert color="failure" className="mb-4 flex items-center">
+    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    {publishError}
+  </Alert>
+)}
+
+{/* Upload Progress */}
+{isUploading && (
+  <div className="mb-4">
+    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+      <span>Uploading image...</span>
+      <span>{uploadProgress}%</span>
+    </div>
+    <div className="w-full bg-gray-200 rounded-full h-2">
+      <div 
+        className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+        style={{ width: `${uploadProgress}%` }}
+      ></div>
+    </div>
+  </div>
+)}
 
         {/* Help Text */}
         <div className="mt-6 text-center">
