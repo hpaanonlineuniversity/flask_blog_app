@@ -48,13 +48,14 @@ def create_post(current_user):
 
 def get_posts():
     try:
-        from flask import current_app
-        from ..models.user_model import UserModel
-
-        # Get database from UserModel instance
-        user_model = UserModel()
-        post_model = PostModel(user_model.db)  # Use user_model.db instead
         
+        from ..models.user_model import UserModel  # Import ကိုအပေါ်ဆုံးကထားပါ
+        from flask import current_app
+        # Get post_model from app context
+        post_model = current_app.post_model
+
+        
+           
         # Get query parameters
         start_index = int(request.args.get('startIndex', 0))
         limit = int(request.args.get('limit', 9))
@@ -87,9 +88,8 @@ def get_posts():
                 {'title': {'$regex': search_term, '$options': 'i'}},
                 {'content': {'$regex': search_term, '$options': 'i'}}
             ]
-        
-        # Get posts
-        post_model = PostModel(current_app.user_model.db)
+
+        # Use post_model directly
         posts = post_model.search_posts(
             query_filter=query_filter,
             sort_field='updated_at',
@@ -114,6 +114,7 @@ def get_posts():
         })
         
     except Exception as e:
+        print(f"Error in get_posts: {str(e)}")  # Debugging အတွက်
         return error_handler(500, str(e))
 
 @token_required
