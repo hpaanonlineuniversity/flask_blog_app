@@ -182,7 +182,7 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {posts.slice(1, 7).map((post) => (
-                <PostCard key={post._id} post={post} />
+                <PostCard key={post.id} post={post} />
               ))}
             </div>
             
