@@ -59,10 +59,18 @@ def signin(user_model):
         
         user_data = valid_user.to_dict()
         
-        response = make_response(jsonify({
-            'success': True,
-            'user': user_data
-        }))
+        
+       ## response = make_response(jsonify({
+        ##    'success': True,
+         ##   'user': user_data
+        ##}))
+
+        response_data = {
+            'success': True
+        }
+        response_data.update(user_data)
+
+        response = make_response(jsonify(response_data))
         
         response.set_cookie(
             'access_token',
@@ -91,10 +99,17 @@ def google_auth(user_model):
             token = generate_token(user._id, user.is_admin)
             user_data = user.to_dict()
             
-            response = make_response(jsonify({
-                'success': True,
-                'user': user_data
-            }))
+            ##response = make_response(jsonify({
+            ##    'success': True,
+            ##    'user': user_data
+            ##}))
+
+            response_data = {
+                'success': True
+            }
+            response_data.update(user_data)
+
+            response = make_response(jsonify(response_data))
             
             response.set_cookie(
                 'access_token',
@@ -133,10 +148,17 @@ def google_auth(user_model):
             token = generate_token(new_user._id, new_user.is_admin)
             user_data = new_user.to_dict()
             
-            response = make_response(jsonify({
-                'success': True,
-                'user': user_data
-            }))
+            ##response = make_response(jsonify({
+            ##    'success': True,
+            ##    'user': user_data
+            ##}))
+
+            response_data = {
+                'success': True
+            }
+            response_data.update(user_data)
+
+            response = make_response(jsonify(response_data))
             
             response.set_cookie(
                 'access_token',
