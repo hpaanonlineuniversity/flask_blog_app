@@ -1,0 +1,21 @@
+ Update by _id (Most Precise)
+
+db.users.updateOne(
+  { _id: ObjectId('68ff892dc66cd0d58a4f8811') },
+  { $set: { is_admin: true } }
+)
+
+
+db.users.updateOne(
+  { username: 'hpaanonlineuniversity5313' },
+  { $set: { isAdmin: true } }
+)
+
+db.users.updateOne(
+  { email: 'hpaanonlineuniversity@gmail.com' },
+  { $set: { isAdmin: true } }
+)
+
+
+
+
