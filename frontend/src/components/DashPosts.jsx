@@ -93,31 +93,55 @@ export default function DashPosts() {
     await fetchUserPosts(startIndex);
   };
 
-  const handleDeletePost = async () => {
-    try {
-      setError('');
-      
-      if (!userId) {
-        throw new Error('User ID not found');
-      }
-
-      const res = await fetch(`/api/post/deletepost/${postIdToDelete}/${userId}`, {
-        method: 'DELETE',
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to delete post');
-      }
-
-      setUserPosts(prev => prev.filter(post => post._id !== postIdToDelete));
-      setShowModal(false);
-      setPostIdToDelete('');
-    } catch (error) {
-      setError(error.message);
+const handleDeletePost = async () => {
+  try {
+    setError('');
+    
+    if (!userId) {
+      throw new Error('User ID not found');
     }
-  };
+
+    console.log('🗑️ Deleting post:', {
+      postId: postIdToDelete,
+      currentPostsCount: userPosts.length
+    });
+
+    const res = await fetch(`/api/post/deletepost/${postIdToDelete}/${userId}`, {
+      method: 'DELETE',
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to delete post');
+    }
+
+    console.log('✅ Delete API success, updating UI...');
+    
+    // Method 1: Optimistic update
+    const newPosts = userPosts.filter(post => post._id !== postIdToDelete);
+    console.log('🔄 Posts after filter:', newPosts.length);
+    
+    setUserPosts(newPosts);
+    setShowModal(false);
+    setPostIdToDelete('');
+    
+    console.log('🎯 UI should update now with', newPosts.length, 'posts');
+
+    // Optional: Force a small delay and refetch to ensure consistency
+    setTimeout(() => {
+      console.log('🔄 Ensuring data consistency...');
+      fetchUserPosts(0);
+    }, 500);
+
+  } catch (error) {
+    console.error('❌ Error deleting post:', error);
+    setError(error.message);
+    
+    // On error, refetch to sync with server
+    fetchUserPosts(0);
+  }
+};
 
   const handleSearch = (e) => {
     e.preventDefault();
