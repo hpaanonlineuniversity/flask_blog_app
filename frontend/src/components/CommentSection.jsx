@@ -74,7 +74,7 @@ export default function CommentSection({ postId }) {
         const data = await res.json();
         setComments(
           comments.map((comment) =>
-            comment._id === commentId
+            comment.id === commentId
               ? {
                   ...comment,
                   likes: data.likes,
@@ -92,7 +92,7 @@ export default function CommentSection({ postId }) {
   const handleEdit = async (comment, editedContent) => {
     setComments(
       comments.map((c) =>
-        c._id === comment._id ? { ...c, content: editedContent } : c
+        c.id === comment.id ? { ...c, content: editedContent } : c
       )
     );
   };
@@ -104,7 +104,7 @@ export default function CommentSection({ postId }) {
         method: 'DELETE',
       });
       if (res.ok) {
-        setComments(comments.filter((comment) => comment._id !== commentId));
+        setComments(comments.filter((comment) => comment.id !== commentId));
       }
     } catch (error) {
       console.log(error.message);
@@ -176,7 +176,7 @@ export default function CommentSection({ postId }) {
 
           {comments.map((comment) => (
             <Comment
-              key={comment._id}
+              key={comment.id}
               comment={comment}
               onLike={handleLike}
               onEdit={handleEdit}

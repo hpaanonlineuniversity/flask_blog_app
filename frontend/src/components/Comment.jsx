@@ -32,7 +32,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`/api/comment/editComment/${comment._id}`, {
+      const res = await fetch(`/api/comment/editComment/${comment.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -104,10 +104,10 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
             <div className='flex items-center pt-2 text-xs border-t dark:border-gray-700 max-w-fit gap-2'>
               <button
                 type='button'
-                onClick={() => onLike(comment._id)}
+                onClick={() => onLike(comment.id)}
                 className={`text-gray-400 hover:text-blue-500 ${
                   currentUser &&
-                  comment.likes.includes(currentUser._id) &&
+                  comment.likes.includes(currentUser.id) &&
                   '!text-blue-500'
                 }`}
               >
@@ -120,7 +120,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
                     (comment.numberOfLikes === 1 ? 'like' : 'likes')}
               </p>
               {currentUser &&
-                (currentUser._id === comment.userId || currentUser.isAdmin) && (
+                (currentUser.id === comment.userId || currentUser.isAdmin) && (
                   <>
                     <button
                       type='button'
@@ -131,7 +131,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
                     </button>
                     <button
                       type='button'
-                      onClick={() => onDelete(comment._id)}
+                      onClick={() => onDelete(comment.id)}
                       className='text-gray-400 hover:text-red-500'
                     >
                       Delete

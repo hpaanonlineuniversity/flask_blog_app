@@ -30,7 +30,7 @@ export default function DashComments() {
     if (currentUser.isAdmin) {
       fetchComments();
     }
-  }, [currentUser._id]);
+  }, [currentUser.id]);
 
   const handleShowMore = async () => {
     const startIndex = comments.length;
@@ -55,7 +55,7 @@ export default function DashComments() {
       });
 
       if (res.ok) {
-        setComments(comments.filter(comment => comment._id !== commentIdToDelete));
+        setComments(comments.filter(comment => comment.id !== commentIdToDelete));
         setCommentIdToDelete('');
       } else {
         console.log('Failed to delete comment');
@@ -98,7 +98,7 @@ export default function DashComments() {
           <div className='bg-white dark:bg-gray-800 rounded-b-lg shadow-md'>
             {comments.map((comment) => (
               <div 
-                key={comment._id} 
+                key={comment.id} 
                 className='grid grid-cols-12 gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors'
               >
                 {/* Date */}
@@ -152,7 +152,7 @@ export default function DashComments() {
                   <button
                     onClick={() => {
                       setShowModal(true);
-                      setCommentIdToDelete(comment._id);
+                      setCommentIdToDelete(comment.id);
                     }}
                     className='px-3 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 rounded-md transition-colors'
                   >

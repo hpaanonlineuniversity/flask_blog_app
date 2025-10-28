@@ -39,7 +39,7 @@ export default function PostPage() {
             if (recentRes.ok && recentData.posts) {
               // Filter out the current post from recent posts and take first 3
               const filteredRecentPosts = recentData.posts.filter(
-                (recentPost) => recentPost._id !== data.posts[0]._id
+                (recentPost) => recentPost.id !== data.posts[0].id
               );
               setRecentPosts(filteredRecentPosts.slice(0, 3));
             }
@@ -188,7 +188,7 @@ export default function PostPage() {
       {/* Comment Section */}
       <section className='max-w-4xl mx-auto w-full mt-12 px-4'>
         <div className='border-t border-gray-200 pt-8'>
-          <CommentSection postId={post._id} />
+          <CommentSection postId={post.id} />
         </div>
       </section>
 
@@ -204,7 +204,7 @@ export default function PostPage() {
           <div className='flex flex-wrap justify-center gap-6'>
             {recentPosts.map((recentPost) => (
               <PostCard 
-                key={recentPost._id} 
+                key={recentPost.id} 
                 post={recentPost} 
               />
             ))}
