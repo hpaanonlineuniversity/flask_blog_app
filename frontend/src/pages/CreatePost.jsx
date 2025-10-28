@@ -123,7 +123,7 @@ export default function CreatePost() {
     console.log('Form Data:', formData);
     
     try {
-      const res = await fetch('/api/post/create/', {
+      const res = await fetch('/api/post/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

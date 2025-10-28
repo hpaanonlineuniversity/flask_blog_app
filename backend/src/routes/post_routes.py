@@ -4,11 +4,11 @@ from ..controllers.post_controller import create_post, get_posts, delete_post, u
 def create_post_blueprint():
     post_bp = Blueprint('post', __name__)
     
-    @post_bp.route('/create', methods=['POST'])
+    @post_bp.route('/create/', methods=['POST'])
     def create_post_route():
         return create_post()
     
-    @post_bp.route('/getposts', methods=['GET'])
+    @post_bp.route('/getposts/', methods=['GET'])
     def get_posts_route():
         return get_posts()
     

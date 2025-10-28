@@ -49,6 +49,11 @@ def create_post(current_user):
 def get_posts():
     try:
         from flask import current_app
+        from ..models.user_model import UserModel
+
+        # Get database from UserModel instance
+        user_model = UserModel()
+        post_model = PostModel(user_model.db)  # Use user_model.db instead
         
         # Get query parameters
         start_index = int(request.args.get('startIndex', 0))
