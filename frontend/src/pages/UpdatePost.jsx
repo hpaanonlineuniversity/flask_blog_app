@@ -195,7 +195,7 @@ export default function UpdatePost() {
       
       // Redirect to the post page after successful update
       setTimeout(() => {
-        navigate(`/posts/${data.slug}`);
+        navigate(`/post/${data.slug}`);
       }, 1500);
 
     } catch (error) {
