@@ -26,6 +26,12 @@ export default function DashProfile() {
   });
   const dispatch = useDispatch();
 
+  const userId = currentUser?.id || currentUser?._id;
+  
+  console.log('🔍 Debug - currentUser:', currentUser);
+  console.log('🆔 Debug - User ID:', userId);
+
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };

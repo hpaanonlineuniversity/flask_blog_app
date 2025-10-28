@@ -24,7 +24,7 @@ export default function DashPosts() {
   const [filterCategory, setFilterCategory] = useState('');
 
   // Get user ID from both possible fields
-  const userId = currentUser?._id || currentUser?.id;
+  const userId = currentUser?.id || currentUser?._id;
   
   console.log('🔍 Debug - currentUser:', currentUser);
   console.log('🆔 Debug - User ID:', userId);
@@ -93,55 +93,55 @@ export default function DashPosts() {
     await fetchUserPosts(startIndex);
   };
 
-const handleDeletePost = async () => {
-  try {
-    setError('');
-    
-    if (!userId) {
-      throw new Error('User ID not found');
-    }
+  const handleDeletePost = async () => {
+    try {
+      setError('');
+      
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
 
-    console.log('🗑️ Deleting post:', {
-      postId: postIdToDelete,
-      currentPostsCount: userPosts.length
-    });
+      console.log('🗑️ Deleting post:', {
+        postId: postIdToDelete,
+        currentPostsCount: userPosts.length
+      });
 
-    const res = await fetch(`/api/post/deletepost/${postIdToDelete}/${userId}`, {
-      method: 'DELETE',
-    });
+      const res = await fetch(`/api/post/deletepost/${postIdToDelete}/${userId}`, {
+        method: 'DELETE',
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message || 'Failed to delete post');
-    }
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to delete post');
+      }
 
-    console.log('✅ Delete API success, updating UI...');
-    
-    // Method 1: Optimistic update
-    const newPosts = userPosts.filter(post => post._id !== postIdToDelete);
-    console.log('🔄 Posts after filter:', newPosts.length);
-    
-    setUserPosts(newPosts);
-    setShowModal(false);
-    setPostIdToDelete('');
-    
-    console.log('🎯 UI should update now with', newPosts.length, 'posts');
+      console.log('✅ Delete API success, updating UI...');
+      
+      // Method 1: Optimistic update
+      const newPosts = userPosts.filter(post => post.id !== postIdToDelete);
+      console.log('🔄 Posts after filter:', newPosts.length);
+      
+      setUserPosts(newPosts);
+      setShowModal(false);
+      setPostIdToDelete('');
+      
+      console.log('🎯 UI should update now with', newPosts.length, 'posts');
 
-    // Optional: Force a small delay and refetch to ensure consistency
-    setTimeout(() => {
-      console.log('🔄 Ensuring data consistency...');
+      // Optional: Force a small delay and refetch to ensure consistency
+      setTimeout(() => {
+        console.log('🔄 Ensuring data consistency...');
+        fetchUserPosts(0);
+      }, 500);
+
+    } catch (error) {
+      console.error('❌ Error deleting post:', error);
+      setError(error.message);
+      
+      // On error, refetch to sync with server
       fetchUserPosts(0);
-    }, 500);
-
-  } catch (error) {
-    console.error('❌ Error deleting post:', error);
-    setError(error.message);
-    
-    // On error, refetch to sync with server
-    fetchUserPosts(0);
-  }
-};
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -256,7 +256,7 @@ const handleDeletePost = async () => {
               </thead>
               <tbody>
                 {userPosts.map((post) => (
-                  <tr key={post._id || post.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                  <tr key={post.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-900 dark:text-white">
@@ -318,7 +318,7 @@ const handleDeletePost = async () => {
                           <HiOutlineEye className="w-5 h-5" />
                         </Link>
                         <Link
-                          to={`/update-post/${post._id || post.id}`}
+                          to={`/update-post/${post.id}`}
                           className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                           title="Edit Post"
                         >
@@ -327,7 +327,7 @@ const handleDeletePost = async () => {
                         <button
                           onClick={() => {
                             setShowModal(true);
-                            setPostIdToDelete(post._id || post.id);
+                            setPostIdToDelete(post.id);
                           }}
                           className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                           title="Delete Post"
