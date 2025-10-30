@@ -25,7 +25,7 @@ class User:
     
     def to_dict(self):
         return {
-            'id': self.id,
+            '_id': self.id,
             'username': self.username,
             'email': self.email,
             'profilePicture': self.profile_picture,
