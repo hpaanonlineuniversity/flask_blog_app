@@ -12,7 +12,7 @@ export default function Home() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/post/getPosts?limit=8');
+        const res = await fetch('/api/post/getposts?limit=8');
         const data = await res.json();
         setPosts(data.posts);
         
